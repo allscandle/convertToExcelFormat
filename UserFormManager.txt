@@ -1,0 +1,111 @@
+Option Explicit
+
+Const LOGGER = "logger"
+Const APPEND = "append"
+Private m_logger_checkbox_count_lng As Long
+Private m_append_checkbox_count_lng As Long
+'***********************************************************
+' 機能   : コンストラクタ
+' 引数   : なし
+' 戻り値 : なし
+'***********************************************************
+Private Sub Class_Initialize()
+    Call setCheckBoxStatusCount(LOGGER)
+    Call setCheckBoxStatusCount(APPEND)
+End Sub
+'***********************************************************
+' 機能   : チェックボックスのチェック数を設定する
+' 引数   : コントロールオブジェクトのグループ名 String
+' 戻り値 : なし
+'***********************************************************
+Private Function setCheckBoxStatusCount(ByVal group_name_str As String)
+    Dim control_ctl As Control
+    Dim check_count As Long, index_lng
+
+    '// チェックボックスのカウント数を取得.
+    For Each control_ctl In UserForm1.Controls
+        If TypeName(control_ctl) = "CheckBox" Then
+            If control_ctl.GroupName = group_name_str Then
+                If control_ctl.Value = True Then
+                    check_count = check_count + 1
+                End If
+            End If
+        End If
+    Next control_ctl
+    
+    If group_name_str = LOGGER Then
+        m_logger_checkbox_count_lng = check_count
+    ElseIf group_name_str = APPEND Then
+        m_append_checkbox_count_lng = check_count
+    Else
+        '// Do Nothing
+    End If
+End Function
+'***********************************************************
+' 機能   : チェックボックスのチェック数を配列のIndexとして取得する
+' 引数   : コントロールオブジェクトのグループ名 String
+' 戻り値 : 配列のIndex Long
+'***********************************************************
+Private Property Get getNumberOfCheckBoxAsIndex(ByVal group_name_str As String) As Long
+    Dim element_lng As Long: element_lng = 0
+
+    If group_name_str = LOGGER Then
+        element_lng = m_logger_checkbox_count_lng - 1
+    ElseIf group_name_str = APPEND Then
+        element_lng = m_append_checkbox_count_lng - 1
+    Else
+        '// Do Nothing
+    End If
+
+    getNumberOfCheckBoxAsIndex = element_lng
+End Property
+'***********************************************************
+' 機能   : チェックオンしているラベルを取得する
+' 引数   : コントロールオブジェクトのグループ名 String
+' 戻り値 : チェックオンしているラベルの配列 Variant
+'***********************************************************
+Public Function getCheckOnLabels(ByVal group_name_str As String) As Variant
+    Dim check_count As Long
+    Dim control_ctl As Control
+    Dim label_arr() As Variant
+    Dim check_on_labels As Variant, inserted_status As Variant
+    check_count = getNumberOfCheckBoxAsIndex(group_name_str)
+
+    '// チェックオンしているラベルを取得.
+    ReDim check_on_labels(check_count)
+    Dim i As Long: i = 0
+    For Each control_ctl In UserForm1.Controls
+        If TypeName(control_ctl) = "CheckBox" Then
+            If control_ctl.GroupName = group_name_str Then
+                If control_ctl.Value = True Then
+                    check_on_labels(i) = control_ctl.Caption
+                    i = i + 1
+                End If
+            End If
+        End If
+    Next control_ctl
+    
+    '// ラベル配列に"time"/"time[sec]"を追加.
+    label_arr = Array(LABEL_TIME, LABEL_TIME_SEC)
+    inserted_status = insertArray(check_on_labels)
+
+    getCheckOnLabels = inserted_status
+End Function
+'***********************************************************
+' 機能   : 配列に要素を追加する
+' 引数   : チェックオンしているラベルの配列 Variant
+' 戻り値 : "time"と"time[sec]"を追加したチェックオンラベルの配列 Variant
+'***********************************************************
+Public Function insertArray(ByRef check_on_labels As Variant) As Variant
+    Dim inserted_arr As Variant
+    Dim label_add() As Variant
+
+    label_add = Array(LABEL_TIME, LABEL_TIME_SEC)
+    inserted_arr = extendArray(check_on_labels, label_add)
+
+    '// ラベル配列の先頭を"time"に変更
+    inserted_arr(0) = label_add(0)
+    '// ラベル配列の先頭+1を"time[sec]"に変更
+    inserted_arr(1) = label_add(1)
+    insertArray = inserted_arr
+End Function

@@ -1,0 +1,85 @@
+Public test_str As String
+Private Sub CommandButton1_Click()
+'    Dim control_ctl As Control
+'    Dim check_cnt As Long: check_cnt = 0
+'    Dim mapping_class5 As New MappingSheet5
+'
+'    item_str = "logger"
+'    mapping_class5.funcInit (item_str)
+'
+'    '// チェック数をカウント
+'    For Each control_ctl In Me.Controls
+'        If TypeName(control_ctl) = "CheckBox" Then
+'            check_cnt = check_cnt + 1
+'        End If
+'    Next control_ctl
+
+    Call mainProcess
+End Sub
+
+Private Sub UserForm_Initialize()
+    Const TOP_PX_OFFSET = 50
+    Dim item_str As String
+
+    Dim newLoggerLabel As MSForms.Label
+    Dim newAppendLabel As MSForms.Label
+    Dim newLoggerCheck As MSForms.checkbox
+    Dim newAppendCheck As MSForms.checkbox
+    Dim newBtn As MSForms.CommandButton
+
+    Dim mapping_class5 As New MappingSheet5
+    item_str = "logger"
+    mapping_class5.funcInit (item_str)
+
+    Dim arr_str() As String
+    Dim index_lng As Long
+    index_lng = (mapping_class5.m_last_row_lng - mapping_class5.m_start_row_lng)
+    Call mapping_class5.funcGenerateArray(arr_str, index_lng)
+
+    Dim i As Long
+    Dim last_top_px As Long
+    For i = 0 To UBound(arr_str)
+        'ラベル（タイトル）
+        Set newLoggerLabel = Me.Controls.ADD("Forms.Label.1", "ctlLabelTitle" & i) '名前をつけてラベルを追加
+        With newLoggerLabel
+             .Caption = arr_str(i) 'キャプション
+            .AutoSize = True 'サイズは自動
+            .Left = 20 '左からの距離
+            .Top = 22 + TOP_PX_OFFSET + i * 20 '上からの距離（始点から20pxずつズレる）
+        End With
+
+        'チェックボックス（フラグ）
+        Set newLoggerCheck = Me.Controls.ADD("Forms.checkBox.1", "ctlCheckFlg" & i) '名前をつけてチェックボックスを追加
+        With newLoggerCheck
+            .GroupName = "logger"
+            .Value = False '初期値をオフにしておく
+            .Caption = arr_str(i) 'キャプション
+            .Width = 13
+            .Height = 13
+            .Left = 180
+            .Top = 20 + TOP_PX_OFFSET + i * 20
+
+            last_top_px = .Top
+        End With
+    Next i
+
+    Set newBtn = Me.Controls.ADD("Forms.CommandButton.1", "MyCom", True)
+    With newBtn
+        .Top = last_top_pixel_lng + 30          'Top位置
+        .Left = 18                          'Left位置
+        .Height = 20                        '高さ
+        .Width = 70                        '幅
+        .ForeColor = RGB(0, 0, 0)           '文字色
+        .Font.Name = "メイリオ"             'テキストのスタイル
+        .FontSize = 10                      'テキストのサイズ
+        .TabIndex = 1
+        .Caption = "Exection"                '項目名
+    End With
+
+    With UserForm1
+        .Height = last_top_px + 90
+        .Width = 300
+    End With
+    
+    Set mapping_class5 = Nothing
+End Sub
